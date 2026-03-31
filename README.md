@@ -28,10 +28,15 @@ Querying: LINQ (Language Integrated Query) for data aggregation and filtering.
 
 📂 Project Structure
   SpendWise/
+  
   ├── Models/             # Domain entities and Enums (Category, Transaction)
+  
   ├── Interfaces/         # Contracts for services (ITransactionService)
+  
   ├── Services/           # Business logic and File I/O implementation
+  
   ├── Exceptions/         # Custom error handling (InsufficientDataException)
+  
   ├── UI/                 # Console-based User Interface and input logic
   └── Program.cs          # Application entry point
 

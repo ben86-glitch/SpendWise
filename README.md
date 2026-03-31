@@ -29,16 +29,16 @@ Querying: LINQ (Language Integrated Query) for data aggregation and filtering.
 📂 Project Structure
   SpendWise/
   
-  ├── Models/             # Domain entities and Enums (Category, Transaction)
-  
-  ├── Interfaces/         # Contracts for services (ITransactionService)
-  
-  ├── Services/           # Business logic and File I/O implementation
-  
-  ├── Exceptions/         # Custom error handling (InsufficientDataException)
-  
-  ├── UI/                 # Console-based User Interface and input logic
-  └── Program.cs          # Application entry point
+    ├── Models/             # Domain entities and Enums (Category, Transaction)
+    
+    ├── Interfaces/         # Contracts for services (ITransactionService)
+    
+    ├── Services/           # Business logic and File I/O implementation
+    
+    ├── Exceptions/         # Custom error handling (InsufficientDataException)
+    
+    ├── UI/                 # Console-based User Interface and input logic
+    └── Program.cs          # Application entry point
 
   📖 How it Works: The "Type Discriminator"
 To save both Expenses and Subscriptions in a single .txt file, I implemented a Type Discriminator strategy. During the save process, the application records the class name as a metadata column. Upon loading, the system reads this metadata to "rehydrate" the correct object type into memory, ensuring data integrity without needing a complex database.

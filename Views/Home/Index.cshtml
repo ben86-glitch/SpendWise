@@ -1,0 +1,309 @@
+﻿@using X.PagedList
+@using X.PagedList.Mvc.Core
+@model IPagedList<SpendWise.Models.Transaction>
+
+<div class="container mt-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="display-6 mb-0 fw-bold text-dark">SpendWise Dashboard</h1>
+            <p class="text-muted mb-0">Track and manage your expenses efficiently.</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                <i class="bi bi-plus-lg"></i> Add Transaction
+            </a>
+        </div>
+    </div>
+
+    @* --- STATS CARDS REMAIN THE SAME --- *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white h-100">
+                <div class="card-body">
+                    <small class="text-uppercase fw-bold opacity-75 d-block mb-1">This Month</small>
+                    <h4 class="mb-0">₱@(((decimal)ViewBag.TotalMonth).ToString("N2"))</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white h-100">
+                <div class="card-body">
+                    <small class="text-uppercase fw-bold opacity-75 d-block mb-1">This Year</small>
+                    <h4 class="mb-0">₱@(((decimal)ViewBag.TotalYear).ToString("N2"))</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 bg-info text-dark h-100">
+                <div class="card-body">
+                    <small class="text-uppercase fw-bold opacity-75 d-block mb-1">Monthly Subs</small>
+                    <h4 class="mb-0">₱@(((decimal)ViewBag.FixedCosts).ToString("N2"))</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 bg-dark text-white h-100">
+                <div class="card-body">
+                    <small class="text-uppercase fw-bold opacity-75 d-block mb-1">All-Time</small>
+                    <h4 class="mb-0">₱@(((decimal)ViewBag.TotalAllTime).ToString("N2"))</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- PROJECTION LOGIC --- *@
+    @{
+        int daysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+        int currentDay = DateTime.Now.Day;
+        decimal dailyAvg = (decimal)ViewBag.TotalMonth / (currentDay == 0 ? 1 : currentDay);
+        decimal projected = dailyAvg * daysInMonth;
+    }
+
+    <div class="alert alert-light border shadow-sm mb-4 d-flex align-items-center">
+        <div class="me-3 fs-4 text-warning">
+            <i class="bi bi-lightbulb-fill"></i>
+        </div>
+        <span>
+            <strong>Smart Insight:</strong> Based on your spending today, you are projected to end this month at
+            <span class="text-primary fw-bold">₱@projected.ToString("N2")</span>.
+        </span>
+    </div>
+
+    @* --- CATEGORY PROGRESS BARS REMAIN THE SAME --- *@
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Spending by Category</h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.CategoryData != null)
+                    {
+                        foreach (var cat in ViewBag.CategoryData)
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="fw-semibold">@cat.Category</span>
+                                    <span class="text-muted small">
+                                        ₱@cat.Total.ToString("N2") (@cat.Percentage.ToString("0")%)
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary rounded" role="progressbar"
+                                         style="width: @cat.Percentage.ToString("0")%" aria-valuenow="@cat.Percentage"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mt-3 mt-lg-0">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body d-flex flex-column justify-content-center text-center">
+                    <p class="text-muted italic mb-0">"Beware of little expenses; a small leak will sink a great ship."
+                    </p>
+                    <small class="text-muted mt-2">— Benjamin Franklin</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- RECENT HISTORY TABLE WITH PAGINATION --- *@
+    <form asp-action="Index" asp-fragment="history" method="get" class="mb-4">
+        <div class="row g-2 align-items-center bg-light p-2 rounded-3 border mx-0 mb-3 shadow-sm">
+            <div class="col-lg-4 col-md-12">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-primary"></i>
+                    </span>
+                    <input type="text" name="searchString" class="form-control border-start-0 shadow-none"
+                           placeholder="Search..." value="@ViewData["CurrentFilter"]" />
+                    @if (!string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+                    {
+                        <a asp-action="Index" asp-fragment="history"
+                               class="btn btn-white border-top border-bottom border-start-0 text-muted shadow-none">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    }
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+
+            <div class="col-lg-5 col-md-12">
+                <div class="d-flex align-items-center gap-1">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white">From</span>
+                        <input type="date" name="startDate" class="form-control shadow-none"
+                               value="@ViewData["StartDate"]" />
+                        <span class="input-group-text bg-white">To</span>
+                        <input type="date" name="endDate" class="form-control shadow-none"
+                               value="@ViewData["EndDate"]" />
+                        <button type="submit" class="btn btn-outline-primary">Apply</button>
+                    </div>
+            
+                    <div class="dropdown">
+                        <button class="btn btn-link text-dark shadow-none p-1" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li>
+                                <a asp-action="ExportToCSV" asp-all-route-data='new Dictionary<string, string> { 
+                                    { "searchString", ViewData["CurrentFilter"]?.ToString() ?? "" }, 
+                                    { "startDate", ViewData["StartDate"]?.ToString() ?? "" }, 
+                                    { "endDate", ViewData["EndDate"]?.ToString() ?? "" } 
+                                    }' class="dropdown-item py-2">
+                                    <i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i> Export CSV
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-12 ms-auto border-start ps-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="lh-1">
+                        <div class="text-muted fw-bold" style="font-size: 0.65rem;">COUNT</div>
+                        <span class="fw-bold">@Model.TotalItemCount</span>
+                    </div>
+                    <div class="text-end lh-1">
+                        <div class="text-muted fw-bold" style="font-size: 0.65rem;">TOTAL</div>
+                        <span class="fw-bold text-primary">₱@ViewBag.TotalInView.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div id="history" class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Recent History</h5>
+            @* Use TotalItemCount to show the total records in the database *@
+            @*<span class="badge bg-secondary">@Model.TotalItemCount Total Entries</span>*@
+        </div>
+        <div class="table-responsive">
+            @if (Model != null && Model.Any())
+            {
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Transaction</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Billing Cycle</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark">@item.Name</span>
+                                        <span class="text-muted small" style="font-size: 0.8rem;">
+                                            <i class="bi bi-tag-fill me-1"></i>@item.TransactionCategory
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="text-start">
+                                    <div class="fw-bold">
+                                        ₱@item.Amount.ToString("N2")
+                                    </div>
+                                    <small class="text-muted d-block" style="font-size: 0.8rem;">
+                                        <i class="bi bi-wallet2 me-1"></i> @item.PaymentMethod
+                                    </small>
+                                </td>
+                                <td class="text-muted">@item.Date.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    @if (item is SpendWise.Models.Subscription)
+                                    {
+                                        <span class="badge rounded-pill bg-info text-dark">Subscription</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-secondary">Expense</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.BillingCycle.HasValue)
+                                    {
+                                        <span class="text-primary fw-medium">
+                                            <i class="bi bi-calendar-event me-1"></i>@item.BillingCycle.Value
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm rounded-circle border-0" type="button"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                            <li>
+                                                <a class="dropdown-item text-primary" asp-action="Edit" asp-route-id="@item.Id">
+                                                    <i class="bi bi-pencil-square me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" asp-action="Delete"
+                                                       asp-route-id="@item.Id">
+                                                    <i class="bi bi-trash3-fill me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <h5 class="mt-3">No transactions found</h5>
+                </div>
+            }
+        </div>
+
+        @* --- PAGINATION CONTROLS --- *@
+        <div class="card-footer bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Showing page @(Model?.PageNumber ?? 0) of @(Model?.PageCount ?? 0)
+                </div>
+                <div>
+                    @if (Model != null)
+                    {
+                        @Html.PagedListPager(Model, page => Url.Action("Index",
+                            new
+                            {
+                                page,
+                                searchString = ViewData["CurrentFilter"],
+                                startDate = ViewData["StartDate"],
+                                endDate = ViewData["EndDate"]
+                            }) + "#history",
+                            new PagedListRenderOptions
+                            {
+                                UlElementClasses = new[] { "pagination", "pagination-sm", "mb-0" },
+                                LiElementClasses = new[] { "page-item" },
+                                PageClasses = new[] { "page-link" },
+                                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                                DisplayLinkToNextPage = PagedListDisplayMode.Always
+                            })
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

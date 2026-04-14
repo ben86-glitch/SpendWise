@@ -1,0 +1,94 @@
+@model SpendWise.Models.TransactionViewModel
+
+<div class="container mt-5">
+    <div class="card shadow border-primary">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Edit Transaction</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" name="id" value="@Context.Request.RouteValues["id"]" />
+                
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Item Name</label>
+                    <input asp-for="Name" class="form-control" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Amount" class="form-label">Amount (₱)</label>
+                    <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" required />
+                    <span asp-validation-for="Amount" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PaymentMethod" class="form-label">Payment Method</label>
+                    <select asp-for="PaymentMethod" class="form-select" required
+                            asp-items="Html.GetEnumSelectList<SpendWise.Models.Enums.PaymentMethod>()">
+                        <option value="">-- Select Payment Method --</option>
+                    </select>
+                    <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TransactionCategory" class="form-label">Category</label>
+                    <select asp-for="TransactionCategory" class="form-select" required
+                            asp-items="Html.GetEnumSelectList<SpendWise.Models.Enums.Category>()">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                    <span asp-validation-for="TransactionCategory" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Transaction Type</label>
+                    <select id="typeSelector" asp-for="TransactionType" class="form-select" required>
+                        <option value="Expense">One-Time Expense</option>
+                        <option value="Subscription">Subscription</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3" id="billingCycleGroup" style="display:none;">
+                    <label asp-for="BillingCycle" class="form-label">Billing Cycle</label>
+                    <select asp-for="BillingCycle" id="billingInput" class="form-select"
+                            asp-items="Html.GetEnumSelectList<SpendWise.Models.Enums.BillingCycle>()">
+                        <option value="">-- Select Cycle --</option>
+                    </select>
+                    <span asp-validation-for="BillingCycle" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @* Include validation scripts so the form won't submit if invalid *@
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        const selector = document.getElementById('typeSelector');
+        const billingGroup = document.getElementById('billingCycleGroup');
+        const billingInput = document.getElementById('billingInput');
+        
+        function toggleBilling() {
+            if (selector.value === 'Subscription') {
+                billingGroup.style.display = 'block';
+                billingInput.setAttribute('required', 'required');
+            } else {
+                billingGroup.style.display = 'none';
+                billingInput.removeAttribute('required');
+            }
+        }
+
+        selector.addEventListener('change', toggleBilling);
+        
+        // Run on load to set initial state correctly for existing data
+        document.addEventListener('DOMContentLoaded', toggleBilling);
+    </script>
+}

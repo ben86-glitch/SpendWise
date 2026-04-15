@@ -128,6 +128,7 @@ public class HomeController : Controller
                     Amount = vm.Amount,
                     TransactionCategory = vm.TransactionCategory,
                     BillingCycle = vm.BillingCycle,
+                    PaymentMethod = vm.PaymentMethod, // <--- ADD THIS
                     Date = DateTime.Now
                 };
             }
@@ -138,6 +139,7 @@ public class HomeController : Controller
                     Name = vm.Name,
                     Amount = vm.Amount,
                     TransactionCategory = vm.TransactionCategory,
+                    PaymentMethod = vm.PaymentMethod, // <--- ADD THIS
                     Date = DateTime.Now
                 };
             }
@@ -186,7 +188,7 @@ public class HomeController : Controller
             Name = transaction.Name,
             Amount = transaction.Amount,
             TransactionCategory = transaction.TransactionCategory,
-            // Detect the type based on the actual C# class
+            PaymentMethod = transaction.PaymentMethod, // <--- ADD THIS
             TransactionType = transaction is Subscription ? "Subscription" : "Expense",
             BillingCycle = (transaction as Subscription)?.BillingCycle
         };
@@ -203,10 +205,10 @@ public class HomeController : Controller
             var existing = _context.Transactions.Find(id);
             if (existing == null) return NotFound();
 
-            // Update the values
             existing.Name = vm.Name;
             existing.Amount = vm.Amount;
             existing.TransactionCategory = vm.TransactionCategory;
+            existing.PaymentMethod = vm.PaymentMethod; // <--- ADD THIS
             existing.BillingCycle = vm.BillingCycle;
 
             _context.Update(existing);
